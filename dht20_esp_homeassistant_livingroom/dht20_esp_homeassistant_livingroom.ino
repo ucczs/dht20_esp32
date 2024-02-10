@@ -4,6 +4,9 @@
 
 #include <MQTT.h>
 #include "credentials.h"
+#include "settings.h"
+
+#include <ArduinoOTA.h>
 
 WiFiClient net;
 MQTTClient mqtt;
@@ -25,6 +28,9 @@ void setup() {
     delay(1000);
   }
   Serial.println("DHT20 sensor connected");
+
+  ArduinoOTA.setHostname(hostname);
+  ArduinoOTA.begin();
 }
 
 void connect_wifi() {
@@ -35,6 +41,7 @@ void connect_wifi() {
     Serial.println("WiFi connection failed. Retry.");
   }
 
+  WiFi.hostname(hostname);
   Serial.print("Wifi connection established. IP-Address: ");
   Serial.println(WiFi.localIP());
 }
@@ -67,10 +74,11 @@ void loop(){
   Serial.print("Humidity: ");
   Serial.print(humidity_char);
   Serial.print(" %\n");
-  mqtt.publish("sensor/temperature_livingroom", temperature_char);
-  mqtt.publish("sensor/humidity_livingroom", humidity_char);
+  mqtt.publish(topicNameTemp, temperature_char);
+  mqtt.publish(topicNameHumidity, humidity_char);
 
   mqtt.disconnect();
 
+  ArduinoOTA.handle();
   delay(30000);
 }
